@@ -67,3 +67,10 @@ Backend / Firebase Cloud Function
 AI Model API
 ↓
 AURA UI
+```
+## Copyright
+
+Copyright © 2026 Aks / Aditya. All rights reserved.
+
+AURA. is a personal AI assistant prototype created and maintained by Aks / Aditya.
+Unauthorized copying, redistribution, resale, or claiming this project as someone else’s work is not allowed without permission.
