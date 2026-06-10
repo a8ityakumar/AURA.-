@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -59,6 +60,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
@@ -83,13 +85,16 @@ import com.example.data.database.ChatMessage
 import com.example.data.database.ChatSession
 import com.example.data.database.SourceInfo
 import kotlinx.coroutines.launch
+import coil.compose.AsyncImage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
     viewModel: ChatViewModel,
+    authViewModel: AuthViewModel,
     modifier: Modifier = Modifier
 ) {
+    val currentUser by authViewModel.currentUser.collectAsStateWithLifecycle()
     val sessions by viewModel.sessions.collectAsStateWithLifecycle()
     val activeMessages by viewModel.currentMessages.collectAsStateWithLifecycle()
     val activeSessionId by viewModel.currentSessionId.collectAsStateWithLifecycle()
@@ -102,6 +107,8 @@ fun ChatScreen(
 
     val listState = rememberLazyListState()
 
+    var showEditProfile by remember { mutableStateOf(false) }
+
     // Auto-scroll to the bottom when new messages arrive - fast snap in mock mode
     LaunchedEffect(activeMessages.size) {
         if (activeMessages.isNotEmpty()) {
@@ -113,7 +120,13 @@ fun ChatScreen(
         }
     }
 
-    ModalNavigationDrawer(
+    if (showEditProfile) {
+        EditProfileScreen(
+            viewModel = authViewModel,
+            onBack = { showEditProfile = false }
+        )
+    } else {
+        ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet(
@@ -139,8 +152,66 @@ fun ChatScreen(
                             letterSpacing = 1.sp
                         ),
                         color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(vertical = 8.dp)
+                        modifier = Modifier.padding(top = 8.dp)
                     )
+                    
+                    currentUser?.let { user ->
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable {
+                                    scope.launch { drawerState.close() }
+                                    showEditProfile = true
+                                }
+                                .padding(all = 8.dp)
+                                .testTag("sidebar_profile_row")
+                        ) {
+                            if (!user.photoUrl.isNullOrEmpty()) {
+                                AsyncImage(
+                                    model = user.photoUrl,
+                                    contentDescription = "Profile Picture",
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .clip(RoundedCornerShape(20.dp))
+                                        .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f), RoundedCornerShape(20.dp)),
+                                    contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                                )
+                            } else {
+                                Box(
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .clip(RoundedCornerShape(20.dp))
+                                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    val initial = (user.displayName ?: user.email).take(1).uppercase()
+                                    Text(
+                                        text = initial,
+                                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Black),
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = user.displayName ?: user.email.substringBefore("@"),
+                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.primary,
+                                    maxLines = 1
+                                )
+                                Text(
+                                    text = user.email,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.75f),
+                                    maxLines = 1
+                                )
+                            }
+                        }
+                    }
                     
                     Spacer(modifier = Modifier.height(16.dp))
 
@@ -196,29 +267,53 @@ fun ChatScreen(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Row(
-                        modifier = Modifier
-                            .align(Alignment.Start)
-                            .clip(RoundedCornerShape(24.dp))
-                            .background(Color.White)
-                            .clickable {
-                                viewModel.startNewSession()
-                                scope.launch { drawerState.close() }
-                            }
-                            .padding(horizontal = 16.dp, vertical = 10.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "New Chat",
-                            tint = Color.Black,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Row(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(24.dp))
+                                .background(Color.White)
+                                .clickable {
+                                    viewModel.startNewSession()
+                                    scope.launch { drawerState.close() }
+                                }
+                                .padding(horizontal = 16.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "New Chat",
+                                tint = Color.Black,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "New Chat",
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Black
+                            )
+                        }
+
                         Text(
-                            text = "New Chat",
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Black
+                            text = "SIGN OUT",
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 1.sp
+                            ),
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.55f),
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(4.dp))
+                                .clickable {
+                                    scope.launch {
+                                        drawerState.close()
+                                        authViewModel.logout()
+                                    }
+                                }
+                                .padding(8.dp)
+                                .testTag("btn_logout")
                         )
                     }
                 }
@@ -288,6 +383,7 @@ fun ChatScreen(
                             .fillMaxWidth()
                             .background(MaterialTheme.colorScheme.background)
                             .then(if (LocalInspectionMode.current || isDevMode) Modifier else Modifier.navigationBarsPadding())
+                            .imePadding()
                     ) {
                         HorizontalDivider(
                             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
@@ -299,6 +395,13 @@ fun ChatScreen(
                             isGenerating = isGenerating,
                             onSendMessage = { text ->
                                 viewModel.sendMessage(text)
+                            },
+                            onFocusGained = {
+                                scope.launch {
+                                    if (activeMessages.isNotEmpty()) {
+                                        listState.animateScrollToItem(activeMessages.size - 1)
+                                    }
+                                }
                             }
                         )
                     }
@@ -415,6 +518,7 @@ fun ChatScreen(
             }
         }
     )
+    }
 }
 
 @Composable
@@ -746,11 +850,13 @@ fun MessageItem(
 fun InteractionArea(
     isGenerating: Boolean,
     onSendMessage: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onFocusGained: () -> Unit = {}
 ) {
     var inputText by remember { mutableStateOf("") }
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
+    var isFocused by remember { mutableStateOf(false) }
 
     Column(modifier = modifier) {
         Row(
@@ -764,6 +870,12 @@ fun InteractionArea(
                 onValueChange = { inputText = it },
                 modifier = Modifier
                     .weight(1f)
+                    .onFocusChanged { focusState ->
+                        if (focusState.isFocused && !isFocused) {
+                            onFocusGained()
+                        }
+                        isFocused = focusState.isFocused
+                    }
                     .testTag("prompt_input"),
                 textStyle = MaterialTheme.typography.bodyLarge.copy(
                     color = MaterialTheme.colorScheme.primary

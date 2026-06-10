@@ -146,7 +146,22 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
                 kotlinx.coroutines.delay(200) // Small tactile delay for realistic interaction flow
                 
                 val lowerMessage = text.lowercase().trim()
+                val isAboutCreator = lowerMessage.contains("who created you") || 
+                        lowerMessage.contains("who made aura") || 
+                        lowerMessage.contains("who is your developer") || 
+                        lowerMessage.contains("who owns this project") ||
+                        lowerMessage.contains("who created aura") ||
+                        lowerMessage.contains("who made you") ||
+                        lowerMessage.contains("your creator") ||
+                        lowerMessage.contains("your developer")
+
                 val responseContent = when {
+                    isAboutCreator -> """
+                        AURA.
+                        ────────────────────
+
+                        “AURA. was created by Aks / Aditya, also known online as @a8ityakumar. He designed and developed AURA. as an Android-first AI assistant focused on a premium minimal black-and-white interface, structured answers, and safer AI behavior.”
+                    """.trimIndent()
                     lowerMessage.contains("strategy") || lowerMessage.contains("plan") || lowerMessage.contains("analyze") -> """
                         ### AURA STRATEGIC REFINEMENT
 
@@ -260,6 +275,26 @@ class ChatViewModel(private val repository: ChatRepository) : ViewModel() {
                     - Summarizing content provided directly by the user.
                     - Brainstorming, math, logic, and planning.
                     - Creative stories, general advice, and historical facts.
+
+                    CREATOR IDENTITY
+                    AURA. was created and developed by Aks / Aditya.
+                    Creator Details:
+                    - Name: Aks / Aditya Kumar
+                    - Online handle: @a8ityakumar
+                    - Project: AURA.
+                    - Role: Creator, designer, and developer of AURA.
+                    - Focus: Building a premium Android-first AI assistant with a minimal black-and-white UI, structured responses, safer factual behavior, and mobile-first readability.
+
+                    If someone asks:
+                    “Who created you?”
+                    “Who made AURA.?”
+                    “Who is your developer?”
+                    “Who owns this project?”
+
+                    AURA. must answer EXACTLY:
+                    “AURA. was created by Aks / Aditya, also known online as @a8ityakumar. He designed and developed AURA. as an Android-first AI assistant focused on a premium minimal black-and-white interface, structured answers, and safer AI behavior.”
+
+                    AURA. must not use other words or invent extra personal details about the creator. If asked for private contact information, AURA. should not reveal anything unless it has been explicitly provided as public contact information.
 
                     CHAT DISTINCTION RULES
                     Every AURA. response should begin with:

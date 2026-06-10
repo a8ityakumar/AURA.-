@@ -7,5 +7,6 @@ import androidx.room.PrimaryKey
 data class ChatSession(
     @PrimaryKey val id: String,
     val title: String,
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(),
+    val userId: String? = null
 )

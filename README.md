@@ -1,76 +1,21 @@
-# AURA.
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
+</div>
 
-AURA. is an Android-first AI assistant prototype built with Google AI Studio.  
-The project focuses on creating a clean, premium, mobile-friendly AI chat experience with strong readability, structured responses, and careful factual behavior.
+# Run and deploy your AI Studio app
 
-## Overview
+This contains everything you need to run your app locally.
 
-AURA. is designed as a minimal black-and-white AI assistant interface inspired by modern AI products like ChatGPT, Perplexity, and premium mobile productivity apps.
+View your app in AI Studio: https://ai.studio/apps/a1981ee5-5be4-4004-99aa-4db51c9aa960
 
-The goal is not just to build another chatbot, but to create an assistant that feels polished, readable, honest, and useful on Android devices.
+## Run Locally
 
-## Current Features
+**Prerequisites:**  [Android Studio](https://developer.android.com/studio)
 
-- Android-first chat UI
-- Minimal black-and-white premium design
-- Clean message layout
-- Structured AI responses
-- Heading hierarchy for better readability
-- Mobile-friendly spacing
-- User-friendly error handling
-- Safer response behavior for unknown or current information
-- Anti-hallucination rules for latest/current queries
-- Support for analyzing user-provided text, screenshots, and visible profile information
 
-## Current Development Focus
-
-AURA. is currently focused on improving:
-
-- Response accuracy
-- Markdown rendering
-- Table rendering
-- Chat readability
-- Stable AI model connection
-- Better error handling
-- Play Store-ready architecture planning
-
-## Important Design Decisions
-
-AURA. does not pretend to know live or latest information unless online search is properly connected.
-
-If a user asks about current topics such as latest news, social media profiles, prices, server status, exam updates, or recent releases, AURA. clearly explains that it cannot verify current information without online search.
-
-This makes the assistant more trustworthy and reduces hallucinated answers.
-
-## Planned Features
-
-- Proper markdown rendering
-- Real table rendering
-- Chat history persistence
-- Memory system
-- Voice input and output
-- Streaming responses
-- Better message bubbles
-- Backend-based API architecture
-- Optional online search with verified sources
-- Play Store-ready deployment structure
-
-## Tech Direction
-
-Planned architecture:
-
-```text
-AURA Android App
-↓
-Backend / Firebase Cloud Function
-↓
-AI Model API
-↓
-AURA UI
-```
-## Copyright
-
-Copyright © 2026 Aks / Aditya. All rights reserved.
-
-AURA. is a personal AI assistant prototype created and maintained by Aks / Aditya.
-Unauthorized copying, redistribution, resale, or claiming this project as someone else’s work is not allowed without permission.
+1. Open Android Studio
+2. Select **Open** and choose the directory containing this project
+3. Allow Android Studio to fix any incompatibilities as it imports the project.
+4. Create a file named `.env` in the project directory and set `GEMINI_API_KEY` in that file to your Gemini API key (see `.env.example` for an example)
+5. Remove this line from the app's `build.gradle.kts` file: `signingConfig = signingConfigs.getByName("debugConfig")`
+6. Run the app on an emulator or physical device
